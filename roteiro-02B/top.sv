@@ -19,7 +19,7 @@ module top(input  logic clk_2,
            output logic lcd_MemWrite, lcd_Branch, lcd_MemtoReg, lcd_RegWrite);
 
   always_comb begin
-    SEG <= SWI;
+    //SEG <= SWI;
     lcd_WriteData <= SWI;
     lcd_pc <= 'h12;
     lcd_instruction <= 'h34567890;
@@ -39,13 +39,33 @@ module top(input  logic clk_2,
     lcd_b <= {SWI, 56'hFEDCBA09876543};
   end
 
-  logic [3:0] contador;
+  // Problema 1 - agencia bancaria:
 
-  always_ff @(posedge clk_2) begin
-     contador <= contador+1;
+  // Criando váriaveis para as entradas e saida
+  logic [1:0] porta;
+  logic [1:0] relog;
+  logic [1:0] inter;
+  logic [1:0] out;
+
+  always_comb begin
+    // atribuindo a variavel seu respectivo switch
+    porta <= SWI[0];
+    relog <= SWI[1];
+    inter <= SWI[2];
+
+    // Logica do problema.
+    // out recebe 1 se o cofre for aberto fora do expediente ou o interruptor
+    // estiver ligado.
+    out <= porta & (~relog | inter);
+
+    // Liga o led simulando a sirene do alarme. De acordo com a logica do
+    // sistema.
+    LED[1] <= out;
+
   end
 
-  always_comb LED[0] <= clk_2;
-  always_comb LED[7:4] <= contador;
+
+  // Problema 2 - estufa
+
 
 endmodule
