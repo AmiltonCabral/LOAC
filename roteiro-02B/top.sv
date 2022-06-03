@@ -39,7 +39,8 @@ module top(input  logic clk_2,
     lcd_b <= {SWI, 56'hFEDCBA09876543};
   end
 
-  // Problema 1 - agencia bancaria:
+
+  // Problema 1 - agencia bancaria ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   // Criando váriaveis para as entradas e saida
   logic [1:0] porta;
@@ -48,12 +49,12 @@ module top(input  logic clk_2,
   logic [1:0] out;
 
   always_comb begin
-    // atribuindo a variavel seu respectivo switch
+    // atribuindo as variaveis o seu respectivo switch
     porta <= SWI[0];
     relog <= SWI[1];
     inter <= SWI[2];
 
-    // Logica do problema.
+    // - Logica do problema.
     // out recebe 1 se o cofre for aberto fora do expediente ou o interruptor
     // estiver ligado.
     out <= porta & (~relog | inter);
@@ -65,7 +66,42 @@ module top(input  logic clk_2,
   end
 
 
-  // Problema 2 - estufa
+  // Problema 2 - estufa ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  logic [1:0] t1;
+  logic [1:0] t2;
+
+  always_comb begin
+    // atribuindo as variaveis o seu respectivo switch
+    t1 <= SWI[6];       // 1 if T >= 15C
+    t2 <= SWI[7];       // 1 if T >= 20C
+
+    if (~t1 & t2)                // Inconsistencia dos sensores de temperatura
+    begin
+      LED[6] <= 0;
+      LED[7] <= 0;
+      SEG[7] <= 1;
+    end
+    else if (t1 == 0 & t2 == 0)  // Temperatura abaixo de 14C, ligar aquecedor
+    begin
+      LED[6] <= 1;
+      LED[7] <= 0;
+      SEG[7] <= 0;
+    end
+    else if (t1 & t2)            // Temperatura acima de 20C, ligar resfriador
+    begin
+      LED[6] <= 0;
+      LED[7] <= 1;
+      SEG[7] <= 0;
+    end
+    else                         // Temperatura adequada, não fazer nada
+    begin
+      LED[6] <= 0;
+      LED[7] <= 0;
+      SEG[7] <= 0;
+    end
+
+  end
 
 
 endmodule
