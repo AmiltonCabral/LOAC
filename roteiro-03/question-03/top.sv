@@ -38,15 +38,19 @@ module top(input  logic clk_2,
     lcd_b <= {SWI, 56'hFEDCBA09876543};
   end
 
-  logic [2:0] f;
-  logic [3:0] a;
-  logic [3:0] b;
-  logic [3:0] sum;
+  logic [1:0] f;
+  logic signed [2:0] a;
+  logic signed [2:0] b;
 
-  parameter NUM_0 = 'b00000000;
-  parameter NUM_1 = 'b00000110;
-  parameter NUM_2 = 'b01011011;
-  parameter NUM_3 = 'b01001111;
+  parameter NUM_N4 = 'b11100110;
+  parameter NUM_N3 = 'b11001111;
+  parameter NUM_N2 = 'b11011011;
+  parameter NUM_N1 = 'b10000110;
+  parameter NUM_0  = 'b00111111;
+  parameter NUM_1  = 'b00000110;
+  parameter NUM_2  = 'b01011011;
+  parameter NUM_3  = 'b01001111;
+  parameter CLEAN  = 'b00000000;
 
   always_comb begin
 
@@ -55,33 +59,34 @@ module top(input  logic clk_2,
     b <= SWI[2:0];
 
 
-    if      (f == 0) // AND
+    if      (f == 2'b00) // AND
     begin
       LED[2:0] <= (a & b);
+      SEG <= CLEAN;
+      LED[7] <= 0;
     end
 
-    else if (f == 1) // OR
+    else if (f == 2'b01) // OR
     begin
       LED[2:0] <= (a | b);
+      SEG <= CLEAN;
+      LED[7] <= 0;
     end
 
-    else if (f == 2) // + SOMA
+    else if (f == 2'b10) // + SOMA
     begin
-      sum = a + b;
-      LED[2:0] <= sum;
-
-      if (sum == 0)
-        SEG <= NUM_0;
-      else if (sum == 1)
-        SEG <= NUM_1;
-      else if (sum == 2)
-        SEG <= NUM_2;
-      else if (sum == 3)
-        SEG <= NUM_3;
-      else // terminar
-        SEG <= NUM_0;
-
-      if (sum > 3) // overflow ou underflow
+      LED[2:0] <= a + b;
+      case (a + b)  // Mostrar o resultado no display 7 segmentos
+        3'b100 : SEG <= NUM_N4;
+        3'b101 : SEG <= NUM_N3;
+        3'b110 : SEG <= NUM_N2;
+        3'b111 : SEG <= NUM_N1;
+        3'b000 : SEG <= NUM_0;
+        3'b001 : SEG <= NUM_1;
+        3'b010 : SEG <= NUM_2;
+        3'b011 : SEG <= NUM_3;
+      endcase
+      if ((a + b) > 3 | (a + b) < -4) // overflow ou underflow
         LED[7] <= 1;
       else
         LED[7] <= 0;
@@ -89,10 +94,18 @@ module top(input  logic clk_2,
 
     else             // - SUBTRACAO
     begin
-      sum = a - b;
-      LED[2:0] <= 0;
-
-      if (sum > 3) // overflow ou underflow
+      LED[2:0] <= a - b;
+      case (a - b)  // Mostrar o resultado no display 7 segmentos
+        3'b100 : SEG <= NUM_N4;
+        3'b101 : SEG <= NUM_N3;
+        3'b110 : SEG <= NUM_N2;
+        3'b111 : SEG <= NUM_N1;
+        3'b000 : SEG <= NUM_0;
+        3'b001 : SEG <= NUM_1;
+        3'b010 : SEG <= NUM_2;
+        3'b011 : SEG <= NUM_3;
+      endcase
+      if ((a - b) > 3 | (a - b) < -4) // overflow ou underflow
         LED[7] <= 1;
       else
         LED[7] <= 0;
