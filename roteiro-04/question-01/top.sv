@@ -19,7 +19,6 @@ module top(input  logic clk_2,
            output logic lcd_MemWrite, lcd_Branch, lcd_MemtoReg, lcd_RegWrite);
 
   always_comb begin
-    SEG <= SWI;
     lcd_WriteData <= SWI;
     lcd_pc <= 'h12;
     lcd_instruction <= 'h34567890;
@@ -41,6 +40,24 @@ module top(input  logic clk_2,
 
   logic reset, serial, selecao;
   logic [3:0] armazen;
+
+  parameter VOID  = 'b00000000;
+  parameter NUM_0 = 'b00111111;
+  parameter NUM_1 = 'b00000110;
+  parameter NUM_2 = 'b01011011;
+  parameter NUM_3 = 'b01001111;
+  parameter NUM_4 = 'b01100110;
+  parameter NUM_5 = 'b01101101;
+  parameter NUM_6 = 'b01111101;
+  parameter NUM_7 = 'b00000111;
+  parameter NUM_8 = 'b01111111;
+  parameter NUM_9 = 'b01101111;
+  parameter NUM_A = 'b01110111;
+  parameter NUM_B = 'b01111100;
+  parameter NUM_C = 'b00111001;
+  parameter NUM_D = 'b01011110;
+  parameter NUM_E = 'b01111001;
+  parameter NUM_F = 'b01110001;
 
   always_ff @(posedge clk_2) begin
     if (reset == 1'b1)            // Reset
@@ -69,6 +86,26 @@ module top(input  logic clk_2,
     serial <= SWI[1];
     selecao <= SWI[2];
     LED[7:4] <= armazen;
+
+    case (armazen)
+      'h0 : SEG <= NUM_0;
+      'h1 : SEG <= NUM_1;
+      'h2 : SEG <= NUM_2;
+      'h3 : SEG <= NUM_3;
+      'h4 : SEG <= NUM_4;
+      'h5 : SEG <= NUM_5;
+      'h6 : SEG <= NUM_6;
+      'h7 : SEG <= NUM_7;
+      'h8 : SEG <= NUM_8;
+      'h9 : SEG <= NUM_9;
+      'hA : SEG <= NUM_A;
+      'hB : SEG <= NUM_B;
+      'hC : SEG <= NUM_C;
+      'hD : SEG <= NUM_D;
+      'hE : SEG <= NUM_E;
+      'hF : SEG <= NUM_F;
+      default: SEG <= VOID;
+    endcase
   end
 
 endmodule

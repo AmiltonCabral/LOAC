@@ -19,7 +19,6 @@ module top(input  logic clk_2,
            output logic lcd_MemWrite, lcd_Branch, lcd_MemtoReg, lcd_RegWrite);
 
   always_comb begin
-    SEG <= SWI;
     lcd_WriteData <= SWI;
     lcd_pc <= 'h12;
     lcd_instruction <= 'h34567890;
@@ -39,6 +38,12 @@ module top(input  logic clk_2,
     lcd_b <= {SWI, 56'hFEDCBA09876543};
   end
 
+  parameter VOID  = 'b00000000;
+  parameter NUM_5 = 'b01101101;
+  parameter NUM_6 = 'b01111101;
+  parameter NUM_9 = 'b01101111;
+  parameter NUM_C = 'b00111001;
+
   parameter ADDR_WIDTH = 2;
   parameter DATA_WIDTH = 3;
   
@@ -47,13 +52,26 @@ module top(input  logic clk_2,
   
   always_comb addr <= SWI[3:2];
 	  
-  always_comb
-	case(addr)
-	2'b00: data_out = 3'b011;
-	2'b01: data_out = 3'b110;
-	2'b10: data_out = 3'b100;
-	2'b11: data_out = 3'b010;
-	endcase
+  always_comb  // - Para cada endereço, exibe a saida no display 7 segmentos
+               // e no led.
+    case(addr)
+    2'b00: begin 
+      data_out = 4'b0110;
+      SEG <= NUM_6;
+    end
+    2'b01: begin
+      data_out = 4'b1100;
+      SEG <= NUM_C;
+    end
+    2'b10: begin
+      data_out = 4'b1001;
+      SEG <= NUM_9;
+    end
+    2'b11: begin
+      data_out = 4'b0101;
+      SEG <= NUM_5;
+    end
+    endcase
 	
   always_comb LED[7:5] <= data_out;  
   
