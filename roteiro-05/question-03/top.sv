@@ -38,5 +38,49 @@ module top(input  logic clk_2,
     lcd_b <= {SWI, 56'hFEDCBA09876543};
   end
 
+  logic reset, serial_in, out;
+
+  always_comb reset <= SWI[0];
+  always_comb serial_in <= SWI[1];
+
+  enum logic [3:0] {A, B, C, D} state;
+  
+  always_ff @(posedge clk_2) begin
+    if(reset) state <= A;
+    else // 1101
+      unique case(state)
+        A: begin
+          out <= 'b1
+          if(serial_in == 0)
+            state <= A;
+          else
+            state <= B;
+        end
+        B: begin
+          out <= 'b0
+          if(serial_in == 0)
+            state <= A;
+          else
+            state <= C;
+        end
+        C: begin
+          out <= 'b1
+          if(serial_in == 0)
+            state <= D;
+          else
+            state <= B;
+        end
+        D: begin
+          out <= 'b1
+          if(serial_in == 0)
+            state <= A;
+          else
+            state <= D;
+        end
+      endcase
+  end
+
+  always_comb LED[0] <= clk_2;
+  always_comb LED[7] <= out;
 
 endmodule
