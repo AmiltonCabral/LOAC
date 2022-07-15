@@ -15,7 +15,7 @@ module top(input  logic clk_2,
            output logic [NBITS_INSTR-1:0] lcd_instruction,
            output logic [NBITS_TOP-1:0] lcd_registrador [0:NREGS_TOP-1],
            output logic [NBITS_TOP-1:0] lcd_pc, lcd_SrcA, lcd_SrcB,
-             lcd_ALUResult, lcd_Result, lcd_WriteData, lcd_ReadData, 
+             lcd_ALUResult, lcd_Result, lcd_WriteData, lcd_ReadData,
            output logic lcd_MemWrite, lcd_Branch, lcd_MemtoReg, lcd_RegWrite);
 
   always_comb begin
@@ -38,49 +38,54 @@ module top(input  logic clk_2,
     lcd_b <= {SWI, 56'hFEDCBA09876543};
   end
 
-  logic reset, serial_in, out;
+  logic reset, serial_in;
 
   always_comb reset <= SWI[0];
   always_comb serial_in <= SWI[1];
 
-  enum logic [3:0] {A, B, C, D} state;
-  
+  enum logic [3:0] {A, B, C, D, E} state;
+
   always_ff @(posedge clk_2) begin
     if(reset) state <= A;
-    else // 1101
+    else // 1101 LSB
       unique case(state)
         A: begin
-          out <= 'b1
           if(serial_in == 0)
             state <= A;
           else
             state <= B;
         end
         B: begin
-          out <= 'b0
-          if(serial_in == 0)
+          if(serial_in == 1)
             state <= A;
           else
             state <= C;
         end
         C: begin
-          out <= 'b1
-          if(serial_in == 0)
-            state <= D;
-          else
-            state <= B;
-        end
-        D: begin
-          out <= 'b1
           if(serial_in == 0)
             state <= A;
           else
             state <= D;
         end
+        D: begin
+          if(serial_in == 0)
+            state <= A;
+          else
+            state <= E;
+        end
+        E: begin
+          if(serial_in == 0)
+            state <= A;
+          else
+            state <= E;
+        end
       endcase
   end
 
   always_comb LED[0] <= clk_2;
-  always_comb LED[7] <= out;
+  always_comb if (state == E)
+                LED[7] <= 1;
+              else
+                LED[7] <= 0;
 
 endmodule

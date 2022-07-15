@@ -15,7 +15,7 @@ module top(input  logic clk_2,
            output logic [NBITS_INSTR-1:0] lcd_instruction,
            output logic [NBITS_TOP-1:0] lcd_registrador [0:NREGS_TOP-1],
            output logic [NBITS_TOP-1:0] lcd_pc, lcd_SrcA, lcd_SrcB,
-             lcd_ALUResult, lcd_Result, lcd_WriteData, lcd_ReadData, 
+             lcd_ALUResult, lcd_Result, lcd_WriteData, lcd_ReadData,
            output logic lcd_MemWrite, lcd_Branch, lcd_MemtoReg, lcd_RegWrite);
 
   always_comb begin
@@ -47,7 +47,7 @@ module top(input  logic clk_2,
 
   always_ff @(posedge clk_2) begin
     if(reset)
-      Count <= 0;
+      Count <= 1;
     else if (load)
       Count <= 1;
     else begin // 1 -> 2 -> 4 -> 8 -> 1...
@@ -62,5 +62,26 @@ module top(input  logic clk_2,
 
   always_comb LED[0] <= clk_2;
   always_comb LED[7:4] <= Count;
+  always_comb
+    case (Count)
+      'h0 : SEG <= 'b00111111;
+      'h1 : SEG <= 'b00000110;
+      'h2 : SEG <= 'b01011011;
+      'h3 : SEG <= 'b01001111;
+      'h4 : SEG <= 'b01100110;
+      'h5 : SEG <= 'b01101101;
+      'h6 : SEG <= 'b01111101;
+      'h7 : SEG <= 'b00000111;
+      'h8 : SEG <= 'b01111111;
+      'h9 : SEG <= 'b01101111;
+      'hA : SEG <= 'b01110111;
+      'hB : SEG <= 'b01111100;
+      'hC : SEG <= 'b00111001;
+      'hD : SEG <= 'b01011110;
+      'hE : SEG <= 'b01111001;
+      'hF : SEG <= 'b01110001;
+      default: SEG <= 'b00000000;
+    endcase
+
 
 endmodule

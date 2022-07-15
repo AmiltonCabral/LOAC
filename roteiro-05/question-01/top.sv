@@ -15,7 +15,7 @@ module top(input  logic clk_2,
            output logic [NBITS_INSTR-1:0] lcd_instruction,
            output logic [NBITS_TOP-1:0] lcd_registrador [0:NREGS_TOP-1],
            output logic [NBITS_TOP-1:0] lcd_pc, lcd_SrcA, lcd_SrcB,
-             lcd_ALUResult, lcd_Result, lcd_WriteData, lcd_ReadData, 
+             lcd_ALUResult, lcd_Result, lcd_WriteData, lcd_ReadData,
            output logic lcd_MemWrite, lcd_Branch, lcd_MemtoReg, lcd_RegWrite);
 
   always_comb begin
@@ -44,8 +44,7 @@ module top(input  logic clk_2,
 
   always_comb begin
     reset <= SWI[0];
-    counter_on <= SWI[1];
-    count_up <= SWI[2];
+    count_up <= SWI[1];
     load <= SWI[3];
     Data_in <= SWI[7:4];
   end
@@ -55,12 +54,11 @@ module top(input  logic clk_2,
       Count <= 0;
     else if (load)
       Count <= Data_in;
-    else if (counter_on) begin
+    else
       if (count_up)
         Count <= Count + 1;
       else
         Count <= Count - 1;
-    end
   end
 
   always_comb begin
@@ -68,7 +66,7 @@ module top(input  logic clk_2,
     LED[1] <= count_up;
     LED[7:4] <= Count;
 
-    case (armazen)
+    case (Count)
       'h0 : SEG <= 'b00111111;
       'h1 : SEG <= 'b00000110;
       'h2 : SEG <= 'b01011011;
